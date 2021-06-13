@@ -1,7 +1,11 @@
 package fr.falkanox.bingo.events;
 
+import dev.jcsoftware.jscoreboards.JPerPlayerMethodBasedScoreboard;
 import fr.falkanox.bingo.Bingo;
 import fr.falkanox.bingo.states.GState;
+import fr.falkanox.bingo.teams.BasicScoreboard;
+import fr.falkanox.bingo.teams.BlueTeam;
+import fr.falkanox.bingo.teams.RedTeam;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,13 +14,23 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerQuit implements Listener {
 
+    RedTeam redTeamClass;
+    BlueTeam blueTeamClass;
+    BasicScoreboard basicScoreboard;
+    JPerPlayerMethodBasedScoreboard scoreboard;
+
     private Bingo main;
-    public PlayerQuit(Bingo main){
+    public PlayerQuit(JPerPlayerMethodBasedScoreboard scoreboard, Bingo main){
         this.main = main;
+        this.scoreboard = scoreboard;
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e){
+
+        redTeamClass = new RedTeam(scoreboard, main);
+        blueTeamClass = new BlueTeam(scoreboard, main);
+        basicScoreboard = new BasicScoreboard(scoreboard, main);
 
         e.setQuitMessage(null);
 
@@ -42,16 +56,12 @@ public class PlayerQuit implements Listener {
 
             }*/
 
-            if(main.jredTeam.isOnTeam(p.getUniqueId())){
-
-                main.jredTeam.removePlayer(p);
-
+            if(scoreboard.findTeam("Bleue").get().isOnTeam(p.getUniqueId())){
+                scoreboard.findTeam("Bleue").get().removePlayer(p);
             }
 
-            if(main.jblueTeam.isOnTeam(p.getUniqueId())){
-
-                main.jblueTeam.removePlayer(p);
-
+            if(scoreboard.findTeam("Rouge").get().isOnTeam(p.getUniqueId())){
+                scoreboard.findTeam("Rouge").get().removePlayer(p);
             }
 
         }
