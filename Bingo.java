@@ -2,11 +2,13 @@ package fr.falkanox.bingo;
 
 import dev.jcsoftware.jscoreboards.JPerPlayerMethodBasedScoreboard;
 import dev.jcsoftware.jscoreboards.JScoreboardTeam;
+import fr.falkanox.bingo.events.PlayerJoin;
 import fr.falkanox.bingo.inventorys.TeamInventory;
 import fr.falkanox.bingo.registers.RegisterCommands;
 import fr.falkanox.bingo.registers.RegisterEvents;
 import fr.falkanox.bingo.scoreboard.WaitingScoreboard;
 import fr.falkanox.bingo.states.GState;
+import fr.falkanox.bingo.teams.BasicScoreboard;
 import fr.falkanox.bingo.teams.BlueTeam;
 import fr.falkanox.bingo.teams.RedTeam;
 import org.bukkit.Bukkit;
@@ -21,11 +23,12 @@ public class Bingo extends JavaPlugin {
 
     private GState state;
 
-    public JPerPlayerMethodBasedScoreboard scoreboard;
-    public JScoreboardTeam jblueTeam;
-    public JScoreboardTeam jredTeam;
-    public BlueTeam blueTeam;
-    public RedTeam redTeam;
+    public JScoreboardTeam blueTeam;
+    public JScoreboardTeam redTeam;
+    private BasicScoreboard basicScoreboard;
+    private RedTeam redTeamClass;
+    private BlueTeam blueTeamClass;
+    private final JPerPlayerMethodBasedScoreboard scoreboard = new JPerPlayerMethodBasedScoreboard();
 
     public String prefix = "§7[§eBingo§7] §e";
     public String error = "§7[§eBingo§7] §c";
@@ -44,18 +47,27 @@ public class Bingo extends JavaPlugin {
 
         setState(GState.WAITING);
 
-        scoreboard = new JPerPlayerMethodBasedScoreboard();
+        getServer().getLogger().info(ChatColor.GREEN + "[Bingo] Plugin actif !");
 
-        jblueTeam = scoreboard.createTeam("Bleue", "§bBleue ", ChatColor.AQUA);
-        blueTeam = new BlueTeam(jblueTeam, scoreboard, this);
+        basicScoreboard = new BasicScoreboard(scoreboard, this);
+        redTeamClass = new RedTeam(scoreboard, this);
+        blueTeamClass = new BlueTeam(scoreboard, this);
 
+        blueTeam = scoreboard.createTeam("Bleue", "§bBleue ", ChatColor.AQUA);
+        redTeam = scoreboard.createTeam("Rouge", "§cRouge ", ChatColor.RED);
+        System.out.println(scoreboard.getTeams());
 
-        jredTeam = scoreboard.createTeam("Rouge", "§cRouge ", ChatColor.RED);
-        redTeam = new RedTeam(jredTeam, scoreboard, this);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+
+            basicScoreboard.addBasicScoreboard(player);
+
+        }
 
     }
 
     public void onDisable(){
+
+        getServer().getLogger().info(ChatColor.GREEN + "[Bingo] Plugin inactif !");
 
     }
 
@@ -67,22 +79,8 @@ public class Bingo extends JavaPlugin {
         return this.state == state;
     }
 
-    public void addBasicScoreboard(Player p){
-
-        for(Player pls : Bukkit.getOnlinePlayers()){
-
-            if(!jblueTeam.isOnTeam(pls.getUniqueId()) && !jredTeam.isOnTeam(pls.getUniqueId())){
-
-                JPerPlayerMethodBasedScoreboard sc = new JPerPlayerMethodBasedScoreboard();
-
-                sc.addPlayer(pls);
-                sc.setTitle(p, "§6§lBINGO");
-                sc.setLines(p,"§c","§7Choisissez une équipe...","§e");
-
-            }
-
-        }
-
+    public JPerPlayerMethodBasedScoreboard getScoreboard() {
+        return scoreboard;
     }
 
 }
