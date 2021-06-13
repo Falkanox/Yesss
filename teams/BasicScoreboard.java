@@ -20,6 +20,7 @@ public class BasicScoreboard {
         this.main = main;
     }
 
+
     public void addBasicScoreboard(Player p) {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
