@@ -5,47 +5,47 @@ import dev.jcsoftware.jscoreboards.JPerPlayerMethodBasedScoreboard;
 import dev.jcsoftware.jscoreboards.JScoreboardTeam;
 import fr.falkanox.bingo.Bingo;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class RedTeam {
 
-    private JScoreboardTeam team;
     private JPerPlayerMethodBasedScoreboard scoreboard;
     private Bingo main;
+    private Optional<JScoreboardTeam> redTeam;
+    private int countdown = 20;
+    Map<String, Long> cooldowns = new HashMap<String, Long>();
+    private long timeleft;
 
-    public RedTeam(JScoreboardTeam team, JPerPlayerMethodBasedScoreboard scoreboard, Bingo main){
-        this.team = team;
+    public RedTeam(JPerPlayerMethodBasedScoreboard scoreboard, Bingo main){
         this.scoreboard = scoreboard;
         this.main = main;
     }
 
-    public void addToRedTeam(UUID uuid, Player p) {
+    public void addToRedTeam(Player player) {
 
-        if (uuid != null) {
+        redTeam = scoreboard.findTeam("Rouge");
 
-            if (team.getEntities().size() < 4) {
+        if (player.isOnline()) {
 
-                if (!team.isOnTeam(uuid) || !main.jblueTeam.isOnTeam(uuid)) {
+            if (redTeam.get().getEntities().size() < 4) {
 
-                    team.addPlayer(p);
-                    addToScoreboard(p);
+                if (!redTeam.get().isOnTeam(player.getUniqueId())) {
+
+                    redTeam.get().addPlayer(player);
+                    addToScoreboard(player);
                     countDown();
-                    p.sendMessage(main.prefix + "Vous avez rejoint l'équipe §crouge §eavec succès !");
+                    player.sendMessage(main.prefix + "Vous avez rejoint l'équipe §crouge §eavec succès !");
 
-                } else if(main.jblueTeam.isOnTeam(uuid)){
+                } else player.sendMessage(main.prefix + "Vous êtes déjà dans cette équipe !");
 
-                    main.jblueTeam.removePlayer(p);
-                    team.addPlayer(p);
-                    addToScoreboard(p);
-                    countDown();
-                    p.sendMessage(main.prefix + "Vous avez rejoint l'équipe §crouge §eavec succès !");
-
-                } else p.sendMessage(main.prefix + "Vous êtes déjà dans cette équipe !");
-
-            } else p.sendMessage(main.error + "Cette équipe est au complet !");
+            } else player.sendMessage(main.error + "Cette équipe est au complet !");
 
 
         }
@@ -55,53 +55,81 @@ public class RedTeam {
     public void addToScoreboard(Player p) {
 
         scoreboard.addPlayer(p);
-        scoreboard.setTitle(p, "§6§lBINGO");
-        scoreboard.setLines(p,
-                "§c",
-                "§fJoueurs:§7 " + Bukkit.getOnlinePlayers().size(),
-                "§e",
-                "§fVotre équipe: §cRouge",
-                "§b",
-                "§fStatut: §7En attente...",
-                "§f",
-                "§fTimer: §700:00",
-                "§a");
-
+        scoreboard.setTitle(p, "&6&lBINGO");
         scoreboard.updateScoreboard();
 
     }
 
-    public void countDown() {
+    private void countDown() {
 
         new BukkitRunnable() {
 
             @Override
             public void run() {
 
-                for (UUID player : team.getEntities()) {
-                    countDownScoreBoard(Bukkit.getPlayer(player));
-                }
+                countDownScoreBoard(timeleft);
+
             }
-        }.runTaskTimerAsynchronously(main,0,20);
+
+        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),10,0);
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                //The milliseconds can cause an error
+                //java.lang.IllegalStateException: Player is either on another team or not on any team. Cannot remove from team 'line1'.
+                if (cooldowns.containsKey("red")) {
+
+                    if (cooldowns.get("red") > System.currentTimeMillis()) {
+
+                        timeleft = (cooldowns.get("red") - System.currentTimeMillis()) / 100;
+
+                    }
+
+                }
+
+            }
+
+        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),20,0);
+
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+
+                countDownScoreBoard( 0);
+
+
+                if (countdown > 0) {
+                    countdown--;
+                    cooldowns.put("red", System.currentTimeMillis() + (1000));
+                }
+
+            }
+        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),0,20);
     }
 
-    private void countDownScoreBoard(Player p) {
+    private void countDownScoreBoard(long timeleft) {
 
-        if(Bukkit.getOnlinePlayers().contains(p)){
+        for (UUID redTeamPlayers : redTeam.get().getEntities()) {
+            Player player = Bukkit.getPlayer(redTeamPlayers);
+            if (Bukkit.getOnlinePlayers().contains(player)) {
 
-            scoreboard.setLines(p,
-                    "§c",
-                    "§fJoueurs:§7 " + Bukkit.getOnlinePlayers().size(),
-                    "§e",
-                    "§fVotre équipe: §cRouge",
-                    "§b",
-                    "§fStatut: §7En attente...",
-                    "§f",
-                    "§fTimer: §700:00",
-                    "§a");
-
+                scoreboard.setLines(player,
+                        "&c",
+                        "&fJoueurs:&7 " + Bukkit.getOnlinePlayers().size(),
+                        "&e",
+                        "&fVotre équipe: &cRouge",
+                        "&b",
+                        "&fStatut: &7En attente...",
+                        "&f",
+                        "&fTimer: "+countdown+":"+timeleft+"0",
+                        "&a");
+                scoreboard.updateScoreboard();
+            }
         }
-
     }
 
 }
