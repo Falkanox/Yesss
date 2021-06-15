@@ -26,7 +26,7 @@ public class PlayerQuit implements Listener {
     }
 
     @EventHandler
-    public void onQuit(PlayerPr e){
+    public void onQuit(PlayerQuitEvent e){
 
         redTeamClass = new RedTeam(scoreboard, main);
         blueTeamClass = new BlueTeam(scoreboard, main);
