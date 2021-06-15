@@ -50,13 +50,13 @@ public class InventoryClick implements Listener {
 
             if(e.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§cÉquipe Rouge")){
 
-                blueTeamClass.addToBlueTeam(p);
+                redTeamClass.addToRedTeam(p);
 
             }
 
             if(e.getCurrentItem().getItemMeta().getDisplayName().equalsIgnoreCase("§bÉquipe Bleue")){
 
-                redTeamClass.addToRedTeam(p);
+                blueTeamClass.addToBlueTeam(p);
 
             }
 
