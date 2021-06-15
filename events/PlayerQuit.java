@@ -26,7 +26,7 @@ public class PlayerQuit implements Listener {
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent e){
+    public void onQuit(PlayerPr e){
 
         redTeamClass = new RedTeam(scoreboard, main);
         blueTeamClass = new BlueTeam(scoreboard, main);
@@ -44,18 +44,6 @@ public class PlayerQuit implements Listener {
 
             }
 
-           /*if(main.teams.inRedTeam(p.getUniqueId())){
-
-                main.teams.getRedTeam().remove(p.getUniqueId());
-                main.teams.team.removePlayer(p);
-
-            } else if(main.teams.inBlueTeam(p.getUniqueId())){
-
-                main.teams.getBlueTeam().remove(p.getUniqueId());
-                main.teams.team.removePlayer(p);
-
-            }*/
-
             if(scoreboard.findTeam("Bleue").get().isOnTeam(p.getUniqueId())){
                 scoreboard.findTeam("Bleue").get().removePlayer(p);
             }
@@ -63,6 +51,8 @@ public class PlayerQuit implements Listener {
             if(scoreboard.findTeam("Rouge").get().isOnTeam(p.getUniqueId())){
                 scoreboard.findTeam("Rouge").get().removePlayer(p);
             }
+
+
 
         }
 
