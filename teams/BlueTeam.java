@@ -17,6 +17,7 @@ public class BlueTeam {
 
     private Bingo main;
     private Optional<JScoreboardTeam> blueTeam;
+    private Optional<JScoreboardTeam> redTeam;
     private JPerPlayerMethodBasedScoreboard scoreboard;
     private int countdown = 20;
     Map<String, Long> cooldowns = new HashMap<String, Long>();
@@ -30,13 +31,23 @@ public class BlueTeam {
     public void addToBlueTeam(Player player) {
 
         blueTeam = scoreboard.findTeam("Bleue");
+        redTeam = scoreboard.findTeam("Rouge");
 
         if (player.isOnline()) {
 
             if (blueTeam.get().getEntities().size() < 4) {
 
-                if (!blueTeam.get().isOnTeam(player.getUniqueId())) {
+                if (!blueTeam.get().isOnTeam(player.getUniqueId()) && !redTeam.get().isOnTeam(player.getUniqueId())) {
 
+                    blueTeam.get().addPlayer(player);
+                    addToScoreboard(player);
+                    countDown();
+
+                    player.sendMessage(main.prefix + "Vous avez rejoint l'équipe §bbleue §eavec succès !");
+
+                } else if(redTeam.get().isOnTeam(player.getUniqueId())){
+
+                    redTeam.get().removePlayer(player);
                     blueTeam.get().addPlayer(player);
                     addToScoreboard(player);
                     countDown();
@@ -46,7 +57,6 @@ public class BlueTeam {
                 } else player.sendMessage(main.prefix + "Vous êtes déjà dans cette équipe !");
 
             } else player.sendMessage(main.error + "Cette équipe est au complet !");
-
 
         }
 
@@ -60,67 +70,41 @@ public class BlueTeam {
 
     }
 
-    private void countDown() {
+    public void countDown() {
 
         new BukkitRunnable() {
 
             @Override
             public void run() {
 
-                countDownScoreBoard(timeleft);
+                for (UUID player : blueTeam.get().getEntities()) {
+                    countDownScoreBoard(Bukkit.getPlayer(player));
 
-
-            }
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),10,0);
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                //The milliseconds can cause an error
-                //java.lang.IllegalStateException: Player is either on another team or not on any team. Cannot remove from team 'line1'.
-                if (cooldowns.containsKey("Blue")) {
-                    if (cooldowns.get("Blue") > System.currentTimeMillis()) {
-                        timeleft = (cooldowns.get("Blue") - System.currentTimeMillis()) / 100;
-                    }
                 }
 
             }
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),20,0);
 
+        }.runTaskTimerAsynchronously(main,0,20);
 
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-
-                countDownScoreBoard(0);
-
-                if (countdown > 0) {
-                    countdown--;
-                    cooldowns.put("Blue", System.currentTimeMillis() + (1000));
-                }
-
-            }
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),0,20);
     }
 
-    private void countDownScoreBoard(long timeleft) {
+    private void countDownScoreBoard(Player p) {
 
-        for (UUID redTeamPlayers : blueTeam.get().getEntities()) {
-            Player player = Bukkit.getPlayer(redTeamPlayers);
-            if (Bukkit.getOnlinePlayers().contains(player)) {
+        if (Bukkit.getOnlinePlayers().contains(p)) {
 
-                scoreboard.setLines(player,
-                        "&c",
-                        "&fJoueurs:&7 " + Bukkit.getOnlinePlayers().size(),
-                        "&e",
-                        "&fVotre équipe: §bBleue",
-                        "&b",
-                        "&fStatut: §7En attente...",
-                        "&f",
-                        "&fTimer: " + countdown + ":" + timeleft + "0",
-                        "&a");
-                scoreboard.updateScoreboard();
-            }
+            scoreboard.setLines(p,
+                    "&c",
+                    "&fJoueurs:&7 " + Bukkit.getOnlinePlayers().size(),
+                    "&e",
+                    "&fVotre équipe: &bBleue",
+                    "&b",
+                    "&fStatut: &7En attente...",
+                    "&f",
+                    "&fTimer: &700:00",
+                    "&a");
+
+            scoreboard.updateScoreboard();
+
         }
     }
 }
