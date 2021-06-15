@@ -23,6 +23,9 @@ public class BasicScoreboard {
 
     public void addBasicScoreboard(Player p) {
 
+        redTeam = scoreboard.findTeam("Rouge");
+        blueTeam = scoreboard.findTeam("Bleue");
+
         for (Player player : Bukkit.getOnlinePlayers()) {
 
             if (blueTeam.get().getEntities().isEmpty() && redTeam.get().getEntities().isEmpty()) {
