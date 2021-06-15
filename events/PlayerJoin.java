@@ -57,13 +57,13 @@ public class PlayerJoin implements Listener {
 
                     e.setJoinMessage(main.prefix + "§7" + p.getName() + " §ea rejoint la partie ! §a(" + Bukkit.getOnlinePlayers().size() + "/10)");
 
+                    if(!scoreboard.findTeam("Rouge").get().isOnTeam(pls.getUniqueId()) && !scoreboard.findTeam("Bleue").get().isOnTeam(pls.getUniqueId())){
+
+                        basicScoreboard.addBasicScoreboard(pls);
+
+                    }
+
                 }
-
-            for (Player player : Bukkit.getOnlinePlayers()) {
-
-                basicScoreboard.addBasicScoreboard(player);
-
-            }
 
         }
 
