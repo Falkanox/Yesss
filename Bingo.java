@@ -2,11 +2,9 @@ package fr.falkanox.bingo;
 
 import dev.jcsoftware.jscoreboards.JPerPlayerMethodBasedScoreboard;
 import dev.jcsoftware.jscoreboards.JScoreboardTeam;
-import fr.falkanox.bingo.events.PlayerJoin;
 import fr.falkanox.bingo.inventorys.TeamInventory;
 import fr.falkanox.bingo.registers.RegisterCommands;
 import fr.falkanox.bingo.registers.RegisterEvents;
-import fr.falkanox.bingo.scoreboard.WaitingScoreboard;
 import fr.falkanox.bingo.states.GState;
 import fr.falkanox.bingo.teams.BasicScoreboard;
 import fr.falkanox.bingo.teams.BlueTeam;
@@ -35,8 +33,6 @@ public class Bingo extends JavaPlugin {
 
     public TeamInventory teamInventory = new TeamInventory();
 
-    public WaitingScoreboard waitingScoreboard = new WaitingScoreboard(this);
-
     public void onEnable(){
 
         getServer().getWorld("world").setTime(1000);
@@ -47,7 +43,7 @@ public class Bingo extends JavaPlugin {
 
         setState(GState.WAITING);
 
-        getServer().getLogger().info(ChatColor.GREEN + "[Bingo] Plugin actif !");
+        getServer().getLogger().info("[Bingo] Plugin actif !");
 
         basicScoreboard = new BasicScoreboard(scoreboard, this);
         redTeamClass = new RedTeam(scoreboard, this);
@@ -67,7 +63,7 @@ public class Bingo extends JavaPlugin {
 
     public void onDisable(){
 
-        getServer().getLogger().info(ChatColor.GREEN + "[Bingo] Plugin inactif !");
+        getServer().getLogger().info("[Bingo] Plugin inactif !");
 
     }
 
