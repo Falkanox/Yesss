@@ -19,6 +19,7 @@ public class RedTeam {
     private JPerPlayerMethodBasedScoreboard scoreboard;
     private Bingo main;
     private Optional<JScoreboardTeam> redTeam;
+    private Optional<JScoreboardTeam> blueTeam;
     private int countdown = 20;
     Map<String, Long> cooldowns = new HashMap<String, Long>();
     private long timeleft;
@@ -31,22 +32,32 @@ public class RedTeam {
     public void addToRedTeam(Player player) {
 
         redTeam = scoreboard.findTeam("Rouge");
+        blueTeam = scoreboard.findTeam("Bleue");
 
         if (player.isOnline()) {
 
             if (redTeam.get().getEntities().size() < 4) {
 
-                if (!redTeam.get().isOnTeam(player.getUniqueId())) {
+                if (!blueTeam.get().isOnTeam(player.getUniqueId()) && !redTeam.get().isOnTeam(player.getUniqueId())) {
 
                     redTeam.get().addPlayer(player);
                     addToScoreboard(player);
                     countDown();
+
+                    player.sendMessage(main.prefix + "Vous avez rejoint l'équipe §crouge §eavec succès !");
+
+                } else if(blueTeam.get().isOnTeam(player.getUniqueId())){
+
+                    blueTeam.get().removePlayer(player);
+                    redTeam.get().addPlayer(player);
+                    addToScoreboard(player);
+                    countDown();
+
                     player.sendMessage(main.prefix + "Vous avez rejoint l'équipe §crouge §eavec succès !");
 
                 } else player.sendMessage(main.prefix + "Vous êtes déjà dans cette équipe !");
 
             } else player.sendMessage(main.error + "Cette équipe est au complet !");
-
 
         }
 
@@ -60,64 +71,29 @@ public class RedTeam {
 
     }
 
-    private void countDown() {
+    public void countDown() {
 
         new BukkitRunnable() {
 
             @Override
             public void run() {
 
-                countDownScoreBoard(timeleft);
-
-            }
-
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),10,0);
-
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                //The milliseconds can cause an error
-                //java.lang.IllegalStateException: Player is either on another team or not on any team. Cannot remove from team 'line1'.
-                if (cooldowns.containsKey("red")) {
-
-                    if (cooldowns.get("red") > System.currentTimeMillis()) {
-
-                        timeleft = (cooldowns.get("red") - System.currentTimeMillis()) / 100;
-
-                    }
+                for (UUID player : redTeam.get().getEntities()) {
+                    countDownScoreBoard(Bukkit.getPlayer(player));
 
                 }
 
             }
 
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),20,0);
+        }.runTaskTimerAsynchronously(main,0,20);
 
-
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-
-                countDownScoreBoard( 0);
-
-
-                if (countdown > 0) {
-                    countdown--;
-                    cooldowns.put("red", System.currentTimeMillis() + (1000));
-                }
-
-            }
-        }.runTaskTimerAsynchronously(Bingo.getPlugin(Bingo.class),0,20);
     }
 
-    private void countDownScoreBoard(long timeleft) {
+    private void countDownScoreBoard(Player p) {
 
-        for (UUID redTeamPlayers : redTeam.get().getEntities()) {
-            Player player = Bukkit.getPlayer(redTeamPlayers);
-            if (Bukkit.getOnlinePlayers().contains(player)) {
+            if (Bukkit.getOnlinePlayers().contains(p)) {
 
-                scoreboard.setLines(player,
+                scoreboard.setLines(p,
                         "&c",
                         "&fJoueurs:&7 " + Bukkit.getOnlinePlayers().size(),
                         "&e",
@@ -125,11 +101,13 @@ public class RedTeam {
                         "&b",
                         "&fStatut: &7En attente...",
                         "&f",
-                        "&fTimer: "+countdown+":"+timeleft+"0",
+                        "&fTimer: &700:00",
                         "&a");
-                scoreboard.updateScoreboard();
-            }
-        }
-    }
 
+                scoreboard.updateScoreboard();
+
+            }
+    }
 }
+
+
